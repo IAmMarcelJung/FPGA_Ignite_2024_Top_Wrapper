@@ -1,6 +1,6 @@
 
 module top_wrapper_test #(
-    parameter NUM_OF_TOTAL_FABRIC_IOS = 32,  //TODO: TBD
+    parameter NUM_OF_TOTAL_FABRIC_IOS = 30,  //TODO: TBD
     parameter NUM_OF_LOGIC_ANALYZER_BITS = 128,
     parameter WB_DATA_WIDTH = 32
 ) (
@@ -192,8 +192,8 @@ module top_wrapper_test #(
     );
 
     // Instantiate VGA Driver module
-    assign io_oeb[19:12] = 8'b00000000;
-    assign io_out[19:12] = {vga_r,vga_g,vga_b,hsync,vsync};
+    assign io_oeb[17:10] = 8'b00000000;
+    assign io_out[17:10] = {vga_r,vga_g,vga_b,hsync,vsync};
 
     vga_driver vga_driver_inst (
         .clk_pix(wb_clk_i),
@@ -211,9 +211,9 @@ module top_wrapper_test #(
 
     //NOVACORE
 
-    assign io_oeb[10]= 1'b1;
-    assign io_oeb[11]=1'b0;
-    toplevel nova_core (.system_clk(wb_clk_i),.system_clk_locked(),.reset_n(resetn),.uart0_txd(io_out[11]), .uart_rxd((io_in[10]));
+    assign io_oeb[8]= 1'b1;
+    assign io_oeb[9]=1'b0;
+    toplevel nova_core (.system_clk(wb_clk_i),.system_clk_locked(),.reset_n(resetn),.uart0_txd(io_out[9]), .uart_rxd((io_in[8]));
 
 
 
@@ -225,9 +225,10 @@ module top_wrapper_test #(
 
      // TODO this needs to be checked thoroughly
 
-     assign io_oeb[9:8]=2'b11;
-     assign select_module = io_in[8];
-     assign sel= io_in[9];
+     assign io_oeb[1]=1'b1;
+     assign io_oeb[7]=1'b1;
+     assign select_module = io_in[1];
+     assign sel= io_in[7];
 
 
      // Module Select
@@ -412,7 +413,7 @@ module top_wrapper_test #(
 
     // TODO: set correct size
     // TODO: These have to be multiplexed with the user modules
-    assign O_top[15:0] = io_in[35:20];
-    assign io_out[35:20] = I_top[15:0];
-    assign io_oeb[35:20] = T_top[15:0];
+    assign O_top[12:0] = io_in[30:18];
+    assign io_out[30:18] = I_top[12:0];
+    assign io_oeb[30:18] = T_top[12:0];
 endmodule
