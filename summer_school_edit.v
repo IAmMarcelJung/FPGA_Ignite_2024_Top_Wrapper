@@ -103,7 +103,7 @@ module top_wrapper_test #(
         .ComActive(), //Dirk said to not connect it
         .ReceiveLED(ReceiveLED),
         .s_clk(s_clk),
-        .s_data(s_data)
+        .s_data(s_data),
 
         .I_top(I_top),
         .O_top(O_top),
@@ -331,8 +331,10 @@ module top_wrapper_test #(
                UIO_BOT_UIN_PAD[39:1] <= {issue_ready,issue_resp_accept, issue_resp_writeback,issue_resp_register_read,register_ready,result_valid, result_data} ;
                end
                endcase
-            end
-     end
+           end
+       endcase
+           end
+
 
 
     always @(*) begin
