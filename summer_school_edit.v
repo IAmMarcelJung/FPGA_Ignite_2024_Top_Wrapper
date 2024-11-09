@@ -30,14 +30,7 @@ module top_wrapper_test #(
     input user_clock2
 );
 
-    localparam include_eFPGA = 1;
-    localparam NumberOfRows = 12;
-    localparam NumberOfCols = 10;
-    localparam FrameBitsPerRow = 32;
-    localparam MaxFramesPerCol = 20;
-    localparam desync_flag = 20;
-    localparam FrameSelectWidth = 5;
-    localparam RowSelectWidth = 5;
+ 
 
     // The number of IOs that can be used the FPGA user design
     localparam NUM_FABRIC_USER_IOS = 16;
@@ -187,7 +180,7 @@ module top_wrapper_test #(
         .stb_i(UI0_BOT_UOUT_PAD[11]),
         .ack_i(UI0_BOT_UIN_PAD[0]),
         .data_o(data_o),
-        .stb_o(),
+        .stb_o(), //indicates data of current pixel and is not currenly usedhttps://github.com/jhspuk/FPGAIgnite-VGA
         .ack_o(UI0_BOT_UOUT_PAD[12])
     );
 
@@ -198,30 +191,26 @@ module top_wrapper_test #(
     vga_driver vga_driver_inst (
         .clk_pix(wb_clk_i),
         .rst_pix(!resetn),
-        .wb_data(data_o),      // Assuming PPU's data output is written to VGA
+        .wb_data(data_o),      // PPU's data output is written to VGA
         .vga_r(vga_r),
         .vga_g(vga_g),
         .vga_b(vga_b),
-        .sx(),
-        .sy(),
+        .sx(), //simulation signals
+        .sy(), //simulation signals
         .hsync(hsync),
         .vsync(vsync),
-        .de()
+        .de()   //simulation signals
     );
 
     //NOVACORE
 
     assign io_oeb[8]= 1'b1;
     assign io_oeb[9]=1'b0;
-    toplevel nova_core (.system_clk(wb_clk_i),.system_clk_locked(),.reset_n(resetn),.uart0_txd(io_out[9]), .uart_rxd((io_in[8]));
+    toplevel nova_core (.system_clk(wb_clk_i),.system_clk_locked(),.reset_n(resetn),.uart0_txd(io_out[9]), .uart_rxd(io_in[8]));
 
 
 
-
-     // Dummy module for I/O testing
-     reg [13:0] inp;
-     wire [13:0] outp;
-     dummy test1 (.inp(inp),.outp(outp));
+    wire select_module,sel;
 
      // TODO this needs to be checked thoroughly
 
@@ -232,21 +221,14 @@ module top_wrapper_test #(
 
 
      // Module Select
-     always @(select_module) begin
+     always @(*) begin
      case (select_module)
 
 
      // THE RING
      1'b0:  begin
             case(sel)
-            //eFPGA
-            0: begin
-               //inputs
-               en <= UIO_BOT_UOUT_PAD[13];
-               //outputs
-               UIO_BOT_UIN_PAD[8:1] <= d_out;
-               end
-
+            
             // Logic Analyzer
             1: begin
                if(la_oenb[7:0])
@@ -254,6 +236,7 @@ module top_wrapper_test #(
                else
                en <= la_data_out[8];
                end
+               
               default: //eFPGA
                  begin
                //inputs
@@ -264,62 +247,18 @@ module top_wrapper_test #(
                endcase
             end
 
-    // Posit coprocessor
-    1'b1: begin
-            case (sel)
-            // eFPGA
-            0: begin
-               // inputs
-               {issue_req_instr[31:18],issue_valid,issue_req_instr,register_valid,register_rs[1],register_rs[0],register_rs_valid,result_ready} <= UIO_BOT_UOUT_PAD[95:13];
-                issue_req_instr [17:0] <= UIO_TOP_UOUT_PAD[17:0];
-
-               //outputs
-               UIO_BOT_UIN_PAD[39:1] <= {issue_ready,issue_resp_accept, issue_resp_writeback,issue_resp_register_read,register_ready,result_valid, result_data} ;
-               end
-
-            // LA
-            1: begin
-               //inputs
-               if (la_oenb[127:8])
-                    {issue_valid,issue_req_instr,register_valid,register_rs[1],register_rs[0],register_rs_valid,result_ready} <= la_data_in[108:8]; // !!! Double check this
-               else
-                     la_data_out [46:8] <= {issue_ready,issue_resp_accept, issue_resp_writeback,issue_resp_register_read,register_ready,result_valid, result_data};
-               end
-
-              default: // eFPGA
-            begin
-               // inputs
-               {issue_req_instr[31:18],issue_valid,issue_req_instr,register_valid,register_rs[1],register_rs[0],register_rs_valid,result_ready} <= UIO_BOT_UOUT_PAD[95:13];
-                issue_req_instr [17:0] <= UIO_TOP_UOUT_PAD[17:0];
-
-               //outputs
-               UIO_BOT_UIN_PAD[39:1] <= {issue_ready,issue_resp_accept, issue_resp_writeback,issue_resp_register_read,register_ready,result_valid, result_data} ;
-               end
-               endcase
-            end
-
-
 
      default: //posit coprocessor
                 begin
             case (sel)
-            // eFPGA
-            0: begin
-               // inputs
-               {issue_req_instr[31:18],issue_valid,issue_req_instr,register_valid,register_rs[1],register_rs[0],register_rs_valid,result_ready} <= UIO_BOT_UOUT_PAD[95:13];
-                issue_req_instr [17:0] <= UIO_TOP_UOUT_PAD[17:0];
-
-               //outputs
-               UIO_BOT_UIN_PAD[39:1] <= {issue_ready,issue_resp_accept, issue_resp_writeback,issue_resp_register_read,register_ready,result_valid, result_data} ;
-               end
 
             // LA
             1: begin
                //inputs
-               if (la_oenb[127:8])
-                    {issue_valid,issue_req_instr,register_valid,register_rs[1],register_rs[0],register_rs_valid,result_ready} <= la_data_in[108:8]; // !!! Double check this
+               if (la_oenb[101:1])
+                    {issue_valid,issue_req_instr,register_valid,register_rs[1],register_rs[0],register_rs_valid,result_ready} <= la_data_in[101:1]; // !!! Double check this
                else
-                     la_data_out [46:8] <= {issue_ready,issue_resp_accept, issue_resp_writeback,issue_resp_register_read,register_ready,result_valid, result_data};
+                     la_data_out [39:1] <= {issue_ready,issue_resp_accept, issue_resp_writeback,issue_resp_register_read,register_ready,result_valid, result_data};
                end
 
                default: // eFPGA
@@ -407,8 +346,7 @@ module top_wrapper_test #(
     assign CLK = wb_clk_i;
 
     // TODO: rethink about these and connect more to the logic analyzers
-    assign la_data_out[6:0] = {
-        A_config_C[39], A_config_C[31], A_config_C[16], FAB2RAM_C[45], ReceiveLED, Rx, ComActive
+    assign la_data_out[103:102] = {ReceiveLED, Rx
     };
 
     // TODO: set correct size
