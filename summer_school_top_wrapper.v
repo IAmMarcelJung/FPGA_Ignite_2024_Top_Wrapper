@@ -1,5 +1,5 @@
 
-module top_wrapper_test #(
+module summer_school_top_wrapper #(
     parameter NUM_OF_TOTAL_FABRIC_IOS = 30,  //TODO: TBD
     parameter NUM_OF_LOGIC_ANALYZER_BITS = 128,
     parameter WB_DATA_WIDTH = 32
