@@ -235,6 +235,18 @@ module summer_school_top_wrapper #(
 
     // Module Select
     always @(*) begin
+        la_data_out = 128'b0;
+        en = 1'b0;
+        UIO_BOT_UIN_PAD = 68'b0;
+        issue_req_instr = 32'b0;
+        issue_valid = 1'b0;
+        register_valid = 1'b0;
+        register_rs[1] = 32'b0;
+        register_rs[0] = 32'b0;
+        register_rs_valid = 1'b0;
+        result_ready = 1'b0;
+
+
         case (select_module)
 
             // THE RING
@@ -244,15 +256,15 @@ module summer_school_top_wrapper #(
                     // Logic Analyzer
                     1: begin
                         if (la_oenb[7:0]) la_data_in[7:0] <= d_out;
-                        else en <= la_data_out[8];
+                        else en = la_data_out[8];
                     end
 
                     //eFPGA
                     default: begin
                         //inputs
-                        en <= UIO_BOT_UOUT_PAD[13];
+                        en = UIO_BOT_UOUT_PAD[13];
                         //outputs
-                        UIO_BOT_UIN_PAD[8:1] <= d_out;
+                        UIO_BOT_UIN_PAD[8:1] = d_out;
                     end
                 endcase
             end
@@ -265,47 +277,47 @@ module summer_school_top_wrapper #(
                     1: begin
                         //inputs
                         if (la_oenb[101:1]) begin
-                            issue_req_instr <= la_data_in[101:70];
-                            issue_valid <= la_data_in[69];
-                            register_valid <= la_data_in[68];
-                            register_rs[1] <= la_data_in[67:36];
-                            register_rs[0] <= la_data_in[35:4];
-                            register_rs_valid <= la_data_in[3:2];
-                            result_ready <= la_data_in[1];
+                            issue_req_instr = la_data_in[101:70];
+                            issue_valid = la_data_in[69];
+                            register_valid = la_data_in[68];
+                            register_rs[1] = la_data_in[67:36];
+                            register_rs[0] = la_data_in[35:4];
+                            register_rs_valid = la_data_in[3:2];
+                            result_ready = la_data_in[1];
 
 
                         end else begin
-                            la_data_out[39] <= issue_ready;
-                            la_data_out[38] <= issue_resp_accept;
-                            la_data_out[37] <= issue_resp_writeback;
-                            la_data_out[36:35] <= issue_resp_register_read;
-                            la_data_out[34] <= register_ready;
-                            la_data_out[33] <= result_valid;
-                            la_data_out[32:1] <= result_data;
+                            la_data_out[39] = issue_ready;
+                            la_data_out[38] = issue_resp_accept;
+                            la_data_out[37] = issue_resp_writeback;
+                            la_data_out[36:35] = issue_resp_register_read;
+                            la_data_out[34] = register_ready;
+                            la_data_out[33] = result_valid;
+                            la_data_out[32:1] = result_data;
                         end
                     end
 
                     // eFPGA
                     default: begin
                         // inputs
-                        issue_req_instr[17:0] <= UIO_TOP_UOUT_PAD[17:0];
+                        issue_req_instr[17:0] = UIO_TOP_UOUT_PAD[17:0];
 
-                        issue_req_instr[31:18] <= UIO_BOT_UOUT_PAD[95:82];
-                        issue_valid <= UIO_BOT_UOUT_PAD[81];
-                        register_valid <= UIO_BOT_UOUT_PAD[80];
-                        register_rs[1] <= UIO_BOT_UOUT_PAD[79:48];
-                        register_rs[0] <= UIO_BOT_UOUT_PAD[47:16];
-                        register_rs_valid <= UIO_BOT_UOUT_PAD[15:14];
-                        result_ready <= UIO_BOT_UOUT_PAD[13];
+                        issue_req_instr[31:18] = UIO_BOT_UOUT_PAD[95:82];
+                        issue_valid = UIO_BOT_UOUT_PAD[81];
+                        register_valid = UIO_BOT_UOUT_PAD[80];
+                        register_rs[1] = UIO_BOT_UOUT_PAD[79:48];
+                        register_rs[0] = UIO_BOT_UOUT_PAD[47:16];
+                        register_rs_valid = UIO_BOT_UOUT_PAD[15:14];
+                        result_ready = UIO_BOT_UOUT_PAD[13];
 
                         //outputs
-                        UIO_BOT_UIN_PAD[39] <= issue_ready;
-                        UIO_BOT_UIN_PAD[38] <= issue_resp_accept;
-                        UIO_BOT_UIN_PAD[37] <= issue_resp_writeback;
-                        UIO_BOT_UIN_PAD[36:35] <= issue_resp_register_read;
-                        UIO_BOT_UIN_PAD[34] <= register_ready;
-                        UIO_BOT_UIN_PAD[33] <= result_valid;
-                        UIO_BOT_UIN_PAD[32:1] <= result_data;
+                        UIO_BOT_UIN_PAD[39] = issue_ready;
+                        UIO_BOT_UIN_PAD[38] = issue_resp_accept;
+                        UIO_BOT_UIN_PAD[37] = issue_resp_writeback;
+                        UIO_BOT_UIN_PAD[36:35] = issue_resp_register_read;
+                        UIO_BOT_UIN_PAD[34] = register_ready;
+                        UIO_BOT_UIN_PAD[33] = result_valid;
+                        UIO_BOT_UIN_PAD[32:1] = result_data;
                     end
                 endcase
             end
@@ -339,9 +351,15 @@ module summer_school_top_wrapper #(
     );
 
     always @(posedge CLK) begin
-        config_strobe_reg1 <= latch_config_strobe;
-        config_strobe_reg2 <= config_strobe_reg1;
-        config_strobe_reg3 <= config_strobe_reg2;
+        if (!resetn) begin
+            config_strobe_reg1 <= 0;
+            config_strobe_reg2 <= 0;
+            config_strobe_reg3 <= 0;
+        end else begin
+            config_strobe_reg1 <= latch_config_strobe;
+            config_strobe_reg2 <= config_strobe_reg1;
+            config_strobe_reg3 <= config_strobe_reg2;
+        end
     end
 
     assign config_strobe = (config_strobe_reg3 && (!config_strobe_reg2)); //posedge pulse for config strobe
@@ -349,7 +367,7 @@ module summer_school_top_wrapper #(
     // Write the config data register from the wishbone bus
     always @(posedge wb_clk_i) begin
         if (wbs_stb_i && wbs_cyc_i && wbs_we_i && !wbs_sta_o && (wbs_adr_i == CONFIG_DATA_WB_ADDRESS)) begin
-            config_data = wbs_dat_i;
+            config_data <= wbs_dat_i;
         end
     end
 
