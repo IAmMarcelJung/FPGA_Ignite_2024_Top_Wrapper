@@ -184,6 +184,7 @@ module summer_school_top_wrapper #(
     wire hsync;
     wire vsync;
 
+    // https://github.com/jhspuk/FPGAIgnite-VGA
     // Pixel Processing Unit
     ppu ppu_inst (
         .clk(wb_clk_i),
@@ -194,7 +195,7 @@ module summer_school_top_wrapper #(
         .stb_i(UIO_BOT_UOUT_PAD[11]),
         .ack_i(UIO_BOT_UIN_PAD[0]),
         .data_o(data_o),
-        .stb_o(), //indicates data of current pixel and is not currenly usedhttps://github.com/jhspuk/FPGAIgnite-VGA
+        .stb_o(),  //indicates data of current pixel and is not currenly used
         .ack_o(UIO_BOT_UOUT_PAD[12])
     );
 
