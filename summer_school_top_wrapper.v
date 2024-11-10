@@ -226,7 +226,7 @@ module summer_school_top_wrapper #(
         .system_clk_locked(),  // NOTE: Participant told to leave this unused
         .reset_n(resetn),
         .uart0_txd(io_out[NOVACORE_UART_TX_IO]),
-        .uart_rxd(io_in[NOVACORE_UART_RX_IO])
+        .uart0_rxd(io_in[NOVACORE_UART_RX_IO])
     );
 
 
