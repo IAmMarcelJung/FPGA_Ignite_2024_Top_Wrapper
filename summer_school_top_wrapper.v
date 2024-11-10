@@ -109,11 +109,11 @@ module summer_school_top_wrapper #(
         .Config_accessC(),  // NOTE: Dirk said to leave this empty since its not needed
 
         .CLK(CLK),
-        .resten(resetn),
+        .resetn(resetn),
         .SelfWriteStrobe(SelfWriteStrobe),
         .SelfWriteData(SelfWriteData),
         .Rx(efpga_uart_rx),
-        .ComActive(),  //Dirk said to not connect it
+        .ComActive(),  // NOTE: Dirk said to not connect it
         .ReceiveLED(ReceiveLED),
         .s_clk(s_clk),
         .s_data(s_data),
@@ -222,7 +222,7 @@ module summer_school_top_wrapper #(
     assign io_oeb[NOVACORE_UART_RX_IO] = 1'b1;
     toplevel nova_core (
         .system_clk(wb_clk_i),
-        .system_clk_locked(),  // Participant told to leave this unused
+        .system_clk_locked(),  // NOTE: Participant told to leave this unused
         .reset_n(resetn),
         .uart0_txd(io_out[NOVACORE_UART_TX_IO]),
         .uart_rxd(io_in[NOVACORE_UART_RX_IO])
