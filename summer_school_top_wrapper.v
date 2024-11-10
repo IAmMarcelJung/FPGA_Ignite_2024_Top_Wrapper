@@ -162,11 +162,10 @@ module summer_school_top_wrapper #(
         .register_ready(register_ready),
         .register_rs(register_rs),
         .register_rs_valid(register_rs_valid),
-        .result_valid(pau_result_valid),
+        .result_valid(result_valid),
         .result_ready(result_ready),
-        .result_data(pau_result_data)
+        .result_data(result_data)
     );
-
 
     // THE RING
     reg en;
