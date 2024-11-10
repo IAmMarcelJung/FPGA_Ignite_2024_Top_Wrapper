@@ -1,6 +1,6 @@
 
 module summer_school_top_wrapper #(
-    parameter NUM_OF_TOTAL_FABRIC_IOS = 30,
+    parameter NUM_OF_TOTAL_FABRIC_IOS = 31,
     parameter NUM_OF_LOGIC_ANALYZER_BITS = 128,
     parameter WB_DATA_WIDTH = 32
 ) (
@@ -46,7 +46,7 @@ module summer_school_top_wrapper #(
     localparam RECEIVE_LED_IO = 6;
 
     // eFPGA IOs
-    localparam EFPGA_USED_NUM_IOS = 13;  // Due to pin count limitation, we don't use all eFPGA IOs
+    localparam EFPGA_USED_NUM_IOS = 14;  // Due to pin count limitation, we don't use all eFPGA IOs
     localparam EFPGA_IO_LOWEST = 7; // This maps to MPRJ_IO[14], which is io[0] on the FABulous board
     localparam EFPGA_IO_HIGHEST = EFPGA_IO_LOWEST + EFPGA_USED_NUM_IOS - 1;
 
