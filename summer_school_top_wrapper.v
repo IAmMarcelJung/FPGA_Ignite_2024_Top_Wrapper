@@ -46,7 +46,7 @@ module summer_school_top_wrapper #(
     localparam RECEIVE_LED_IO = 6;
 
     // eFPGA IOs
-    localparam EFPGA_USED_NUM_IOS = 14;  // Due to pin count limitation, we don't use all eFPGA IOs
+    localparam EFPGA_USED_NUM_IOS = 13;  // Due to pin count limitation, we don't use all eFPGA IOs
     localparam EFPGA_IO_LOWEST = 7; // This maps to MPRJ_IO[14], which is io[0] on the FABulous board
     localparam EFPGA_IO_HIGHEST = EFPGA_IO_LOWEST + EFPGA_USED_NUM_IOS - 1;
 
@@ -58,6 +58,8 @@ module summer_school_top_wrapper #(
     // NOVACORE IOs
     localparam NOVACORE_UART_RX_IO = VGA_IO_HIGHEST + 1; // NOVACORE UART is located after the VGA pins
     localparam NOVACORE_UART_TX_IO = NOVACORE_UART_RX_IO + 1;
+
+    localparam CLK_SEL_IO = NOVACORE_UART_TX_IO + 1;
 
     wire [NUM_FABRIC_USER_IOS-1:0] I_top;
     wire [NUM_FABRIC_USER_IOS-1:0] T_top;
@@ -87,6 +89,8 @@ module summer_school_top_wrapper #(
     // Module selection signals
     wire select_module;
     wire sel;
+
+    wire clk_sel;
 
     // Latch for config_strobe
     reg latch_config_strobe = 0;
@@ -148,7 +152,7 @@ module summer_school_top_wrapper #(
 
     // POSIT coprocessor
     pau pau_inst (
-        .clk(wb_clk_i),
+        .clk(CLK),
         .rst(!resetn),
         .issue_valid(issue_valid),
         .issue_ready(issue_ready),
@@ -169,7 +173,7 @@ module summer_school_top_wrapper #(
     reg en;
     wire [7:0] d_out;
     ro_top ring_inst (
-        .clk(wb_clk_i),
+        .clk(CLK),
         .en(en),
         .d_out(d_out)
     );
@@ -186,7 +190,7 @@ module summer_school_top_wrapper #(
     // https://github.com/jhspuk/FPGAIgnite-VGA
     // Pixel Processing Unit
     ppu ppu_inst (
-        .clk(wb_clk_i),
+        .clk(CLK),
         .rst(!resetn),
         .sync(UIO_BOT_UOUT_PAD[0]),
         .mode(UIO_BOT_UOUT_PAD[2:1]),
@@ -203,17 +207,17 @@ module summer_school_top_wrapper #(
     assign io_out[VGA_IO_HIGHEST:VGA_IO_LOWEST] = {vga_r, vga_g, vga_b, hsync, vsync};
 
     vga_driver vga_driver_inst (
-        .clk_pix(wb_clk_i),
+        .clk_pix(CLK),
         .rst_pix(!resetn),
-        .wb_data(data_o),    // PPU's data output is written to VGA
+        .wb_data(data_o),   // PPU's data output is written to VGA
         .vga_r  (vga_r),
         .vga_g  (vga_g),
         .vga_b  (vga_b),
-        .sx     (),          //simulation signals
-        .sy     (),          //simulation signals
+        .sx     (),         //simulation signals
+        .sy     (),         //simulation signals
         .hsync  (hsync),
         .vsync  (vsync),
-        .de     ()           //simulation signals
+        .de     ()          //simulation signals
     );
 
     //NOVACORE
@@ -221,7 +225,7 @@ module summer_school_top_wrapper #(
     assign io_oeb[NOVACORE_UART_TX_IO] = 1'b0;
     assign io_oeb[NOVACORE_UART_RX_IO] = 1'b1;
     toplevel nova_core (
-        .system_clk(wb_clk_i),
+        .system_clk(CLK),
         .system_clk_locked(),  // NOTE: Participant told to leave this unused
         .reset_n(resetn),
         .uart0_txd(io_out[NOVACORE_UART_TX_IO]),
@@ -369,6 +373,7 @@ module summer_school_top_wrapper #(
     assign s_data = io_in[S_DATA_IO];
     assign efpga_uart_rx = io_in[EFPGA_UART_RX_IO];
     assign io_out[RECEIVE_LED_IO] = ReceiveLED;
+    assign clk_sel = io_in[CLK_SEL_IO];
 
     //TODO: double check, but should be fine
     assign io_oeb[RESETN_IO] = 1'b1;
@@ -378,15 +383,17 @@ module summer_school_top_wrapper #(
     assign io_oeb[S_DATA_IO] = 1'b1;
     assign io_oeb[EFPGA_UART_RX_IO] = 1'b1;
     assign io_oeb[RECEIVE_LED_IO] = 1'b0;  // The only output of the fabric IOs
+    assign io_oeb[CLK_SEL_IO] = 1'b1;
+
 
     assign SelfWriteStrobe = config_strobe;
     assign SelfWriteData = config_data;
-
-    assign CLK = wb_clk_i;
 
     assign la_data_out[103:102] = {ReceiveLED, efpga_uart_rx};
 
     assign O_top[EFPGA_USED_NUM_IOS-1:0] = io_in[EFPGA_IO_HIGHEST:EFPGA_IO_LOWEST];
     assign io_out[EFPGA_IO_HIGHEST:EFPGA_IO_LOWEST] = I_top[EFPGA_USED_NUM_IOS-1:0];
     assign io_oeb[EFPGA_IO_HIGHEST:EFPGA_IO_LOWEST] = T_top[EFPGA_USED_NUM_IOS-1:0];
+
+    assign CLK = clk_sel ? wb_clk_i : user_clock2;
 endmodule
