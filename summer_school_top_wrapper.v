@@ -96,10 +96,10 @@ module summer_school_top_wrapper #(
     wire latch_config_strobe_inverted1;
     wire latch_config_strobe_inverted2;
 
-    wire [17:0] UI0_TOP_UOUT_PAD;
-    reg [39:0] UI0_TOP_UIN_PAD;
-    wire [99:0] UI0_BOT_UOUT_PAD;
-    reg [67:0] UI0_BOT_UIN_PAD;
+    wire [17:0] UIO_TOP_UOUT_PAD;
+    reg [39:0] UIO_TOP_UIN_PAD;
+    wire [99:0] UIO_BOT_UOUT_PAD;
+    reg [67:0] UIO_BOT_UIN_PAD;
 
 
     // TODO: think about if the parameters have to be set
@@ -123,10 +123,10 @@ module summer_school_top_wrapper #(
         .O_top(O_top),
         .T_top(T_top),
 
-        .UI0_TOP_UOUT_PAD(UI0_TOP_UOUT_PAD),
-        .UI0_TOP_UIN_PAD (UI0_TOP_UIN_PAD),
-        .UI0_BOT_UOUT_PAD(UI0_BOT_UOUT_PAD),
-        .UI0_BOT_UIN_PAD (UI0_BOT_UIN_PAD)
+        .UI0_TOP_UOUT_PAD(UIO_TOP_UOUT_PAD),
+        .UI0_TOP_UIN_PAD (UIO_TOP_UIN_PAD),
+        .UI0_BOT_UOUT_PAD(UIO_BOT_UOUT_PAD),
+        .UI0_BOT_UIN_PAD (UIO_BOT_UIN_PAD)
 
     );
 
@@ -188,14 +188,14 @@ module summer_school_top_wrapper #(
     ppu ppu_inst (
         .clk(wb_clk_i),
         .rst(!resetn),
-        .sync(UI0_BOT_UOUT_PAD[0]),
-        .mode(UI0_BOT_UOUT_PAD[2:1]),
-        .data_i(UI0_BOT_UOUT_PAD[10:3]),
-        .stb_i(UI0_BOT_UOUT_PAD[11]),
-        .ack_i(UI0_BOT_UIN_PAD[0]),
+        .sync(UIO_BOT_UOUT_PAD[0]),
+        .mode(UIO_BOT_UOUT_PAD[2:1]),
+        .data_i(UIO_BOT_UOUT_PAD[10:3]),
+        .stb_i(UIO_BOT_UOUT_PAD[11]),
+        .ack_i(UIO_BOT_UIN_PAD[0]),
         .data_o(data_o),
         .stb_o(), //indicates data of current pixel and is not currenly usedhttps://github.com/jhspuk/FPGAIgnite-VGA
-        .ack_o(UI0_BOT_UOUT_PAD[12])
+        .ack_o(UIO_BOT_UOUT_PAD[12])
     );
 
     // Instantiate VGA Driver module
