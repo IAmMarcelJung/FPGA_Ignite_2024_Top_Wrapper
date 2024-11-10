@@ -1,10 +1,10 @@
 
 module summer_school_top_wrapper #(
-    parameter NUM_OF_TOTAL_FABRIC_IOS = 30,  //TODO: TBD
+    parameter NUM_OF_TOTAL_FABRIC_IOS = 30,
     parameter NUM_OF_LOGIC_ANALYZER_BITS = 128,
     parameter WB_DATA_WIDTH = 32
 ) (
-    // Wishbone Slave ports (WB MI A)
+    // Wishbone ports (WB MI A)
     input wb_clk_i,
     input wb_rst_i,
     input wbs_stb_i,
@@ -30,8 +30,6 @@ module summer_school_top_wrapper #(
     input user_clock2
 );
 
-
-
     // The number of IOs that can be used the FPGA user design
     localparam NUM_FABRIC_USER_IOS = 16;
     localparam [31:0] BASE_WB_ADDRESS = 32'h3000_0000;
@@ -49,7 +47,7 @@ module summer_school_top_wrapper #(
 
     // eFPGA IOs
     localparam EFPGA_USED_NUM_IOS = 13;  // Due to pin count limitation, we don't use all eFPGA IOs
-    localparam EFPGA_IO_LOWEST = 7;
+    localparam EFPGA_IO_LOWEST = 7; // This maps to MPRJ_IO[14], which is io[0] on the FABulous board
     localparam EFPGA_IO_HIGHEST = EFPGA_IO_LOWEST + EFPGA_USED_NUM_IOS - 1;
 
     // VGA IOs
@@ -60,8 +58,6 @@ module summer_school_top_wrapper #(
     // NOVACORE IOs
     localparam NOVACORE_UART_RX_IO = VGA_IO_HIGHEST + 1; // NOVACORE UART is located after the VGA pins
     localparam NOVACORE_UART_TX_IO = NOVACORE_UART_RX_IO + 1;
-
-
 
     wire [NUM_FABRIC_USER_IOS-1:0] I_top;
     wire [NUM_FABRIC_USER_IOS-1:0] T_top;
@@ -88,6 +84,9 @@ module summer_school_top_wrapper #(
     wire s_clk;
     wire s_data;
 
+    // Module selection signals
+    wire select_module;
+    wire sel;
 
     // Latch for config_strobe
     reg latch_config_strobe = 0;
@@ -96,7 +95,6 @@ module summer_school_top_wrapper #(
     reg config_strobe_reg3 = 0;
     wire latch_config_strobe_inverted1;
     wire latch_config_strobe_inverted2;
-
 
     wire [17:0] UI0_TOP_UOUT_PAD;
     reg [39:0] UI0_TOP_UIN_PAD;
@@ -112,7 +110,7 @@ module summer_school_top_wrapper #(
         .Config_accessC(),  // NOTE: Dirk said to leave this empty since its not needed
 
         .CLK(CLK),
-        .resten(resetn),  //TODO: resetn still has to be connected to a pin, probably one of io0-2?
+        .resten(resetn),
         .SelfWriteStrobe(SelfWriteStrobe),
         .SelfWriteData(SelfWriteData),
         .Rx(efpga_uart_rx),
@@ -149,6 +147,7 @@ module summer_school_top_wrapper #(
     wire result_valid;  // Signal for result validity
     wire [31:0] result_data;  // Signal for result data (assuming 32-bit width)
 
+    // POSIT coprocessor
     pau pau_inst (
         .clk(wb_clk_i),
         .rst(!resetn),
@@ -176,16 +175,8 @@ module summer_school_top_wrapper #(
         .d_out(d_out)
     );
 
-
     // VGA_Ignite
-    reg sync;
-    reg [2:0] mode;
-    reg [7:0] data_i;
-    reg stb_i;
-    reg ack_o;
-
     wire [7:0] data_o;
-    wire ack_i;
     wire [1:0] vga_r;
     wire [1:0] vga_g;
     wire [1:0] vga_b;
@@ -193,6 +184,7 @@ module summer_school_top_wrapper #(
     wire hsync;
     wire vsync;
 
+    // Pixel Processing Unit
     ppu ppu_inst (
         .clk(wb_clk_i),
         .rst(!resetn),
@@ -230,22 +222,16 @@ module summer_school_top_wrapper #(
     assign io_oeb[NOVACORE_UART_RX_IO] = 1'b1;
     toplevel nova_core (
         .system_clk(wb_clk_i),
-        .system_clk_locked(),
+        .system_clk_locked(),  // Participant told to leave this unused
         .reset_n(resetn),
         .uart0_txd(io_out[NOVACORE_UART_TX_IO]),
         .uart_rxd(io_in[NOVACORE_UART_RX_IO])
     );
 
 
-
-    wire select_module, sel;
-
-
-
     // Module Select
     always @(*) begin
         case (select_module)
-
 
             // THE RING
             1'b0: begin
@@ -257,8 +243,8 @@ module summer_school_top_wrapper #(
                         else en <= la_data_out[8];
                     end
 
-                    default: //eFPGA
-                 begin
+                    //eFPGA
+                    default: begin
                         //inputs
                         en <= UIO_BOT_UOUT_PAD[13];
                         //outputs
@@ -266,7 +252,6 @@ module summer_school_top_wrapper #(
                     end
                 endcase
             end
-
 
             default: //posit coprocessor
                 begin
@@ -289,8 +274,8 @@ module summer_school_top_wrapper #(
                             };
                     end
 
-                    default: // eFPGA
-            begin
+                    // eFPGA
+                    default: begin
                         // inputs
                         {issue_req_instr[31:18],issue_valid,issue_req_instr,register_valid,register_rs[1],register_rs[0],register_rs_valid,result_ready} <= UIO_BOT_UOUT_PAD[95:13];
                         issue_req_instr[17:0] <= UIO_TOP_UOUT_PAD[17:0];
@@ -312,7 +297,6 @@ module summer_school_top_wrapper #(
     end
 
 
-
     always @(*) begin
         if (config_strobe_reg2) begin
             latch_config_strobe = 0;
@@ -323,7 +307,7 @@ module summer_school_top_wrapper #(
         end
     end
 
-    //These are the two inverters
+    // These are the two inverters
     //NOTE: keep the comment for reference
     //assign latch_config_strobe_inverted1 = (!latch_config_strobe);
     sky130_fd_sc_hd__inv latch_config_strobe_inv_0 (
@@ -337,19 +321,24 @@ module summer_school_top_wrapper #(
         .Y(latch_config_strobe_inverted2),
         .A(latch_config_strobe_inverted1)
     );
+
     always @(posedge CLK) begin
         config_strobe_reg1 <= latch_config_strobe;
         config_strobe_reg2 <= config_strobe_reg1;
         config_strobe_reg3 <= config_strobe_reg2;
     end
+
     assign config_strobe = (config_strobe_reg3 && (!config_strobe_reg2)); //posedge pulse for config strobe
 
-    //config data register
+    // Write the config data register from the wishbone bus
     always @(posedge wb_clk_i) begin
         if (wbs_stb_i && wbs_cyc_i && wbs_we_i && !wbs_sta_o && (wbs_adr_i == CONFIG_DATA_WB_ADDRESS)) begin
             config_data = wbs_dat_i;
         end
     end
+
+    // NOTE: Taken from Matt Venns wishbone demo:
+    // https://github.com/mattvenn/wishbone_buttons_leds/blob/master/wb_buttons_leds.v
 
     // acks
     always @(posedge wb_clk_i) begin
@@ -358,7 +347,6 @@ module summer_school_top_wrapper #(
             // return ack immediately
             wbs_ack_o <= (wbs_stb_i && !wbs_sta_o && (wbs_adr_i == CONFIG_DATA_WB_ADDRESS));
     end
-
 
     // TODO: this needs to be checked thoroughly
 
