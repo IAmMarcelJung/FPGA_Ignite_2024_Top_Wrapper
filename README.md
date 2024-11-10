@@ -12,9 +12,9 @@
 |  14-26       | 7-19                | 0-12           | eFPGA IOs           |
 |  27          | 20                  | 13             | VGA V-SYNC          |
 |  28          | 21                  | 14             | VGA H-SYNC          |
-|  29 + 30     | 22 + 23             | 15 + 17        | VGA Blue (2 bit)     |
-|  31 + 32     | 24 + 25             | 17 + 19        | VGA Green (2 bit)   |
-|  33 + 34     | 26 + 27             | 19 + 21        | VGA Red (2 bit)    |
+|  29 + 30     | 22 + 23             | 15 + 16        | VGA Blue (2 bit)     |
+|  31 + 32     | 24 + 25             | 17 + 18        | VGA Green (2 bit)   |
+|  33 + 34     | 26 + 27             | 19 + 20        | VGA Red (2 bit)    |
 |  35          | 28                  | 21             | NOVACORE UART RX    |
 |  36          | 29                  | 22             | NOVACORE UART TX    |
 |  37          | 30                  | 23             | Clock select UART TX</br> 0: user_clock_2, 1: WB clock|
