@@ -98,10 +98,10 @@ module summer_school_top_wrapper #(
     wire latch_config_strobe_inverted1;
     wire latch_config_strobe_inverted2;
 
-    wire [17:0] UIO_TOP_UOUT_PAD;
-    reg [39:0] UIO_TOP_UIN_PAD;
-    wire [99:0] UIO_BOT_UOUT_PAD;
-    reg [67:0] UIO_BOT_UIN_PAD;
+    wire [57:0] UIO_TOP_UOUT_PAD;
+    wire [139:0] UIO_BOT_UOUT_PAD;
+
+    reg [115:0] UIO_BOT_UIN_PAD;
 
 
     flexbex_soc_top flexbex_eFPGA (
@@ -124,9 +124,9 @@ module summer_school_top_wrapper #(
         .T_top(T_top),
 
         .UI0_TOP_UOUT_PAD(UIO_TOP_UOUT_PAD),
-        .UI0_TOP_UIN_PAD (UIO_TOP_UIN_PAD),
+        .UI0_TOP_UIN_PAD(),  // Unused
         .UI0_BOT_UOUT_PAD(UIO_BOT_UOUT_PAD),
-        .UI0_BOT_UIN_PAD (UIO_BOT_UIN_PAD)
+        .UI0_BOT_UIN_PAD(UIO_BOT_UIN_PAD)
 
     );
 
