@@ -17,6 +17,6 @@
 |  33 + 34     | 26 + 27             | 19 + 21        | VGA Red (2 bit)    |
 |  35          | 28                  | 21             | NOVACORE UART RX    |
 |  36          | 29                  | 22             | NOVACORE UART TX    |
-|  37          | 30                  | 23             | Clock select UART TX</br> 0: _user_clock_2, 1: WB clock|
+|  37          | 30                  | 23             | Clock select UART TX</br> 0: user_clock_2, 1: WB clock|
 
 
