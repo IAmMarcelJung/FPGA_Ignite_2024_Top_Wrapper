@@ -102,7 +102,6 @@ module summer_school_top_wrapper #(
     reg [67:0] UIO_BOT_UIN_PAD;
 
 
-    // TODO: think about if the parameters have to be set
     // TODO: TRIPLE (!!!) check everything here!!!
     flexbex_soc_top flexbex_eFPGA (
         .A_config_C(),  // NOTE: Dirk said to leave this empty since its not needed
@@ -261,36 +260,48 @@ module summer_school_top_wrapper #(
                     // LA
                     1: begin
                         //inputs
-                        if (la_oenb[101:1])
-                            {issue_valid,issue_req_instr,register_valid,register_rs[1],register_rs[0],register_rs_valid,result_ready} <= la_data_in[101:1]; // !!! Double check this
-                        else
-                            la_data_out[39:1] <= {
-                                issue_ready,
-                                issue_resp_accept,
-                                issue_resp_writeback,
-                                issue_resp_register_read,
-                                register_ready,
-                                result_valid,
-                                result_data
-                            };
+                        if (la_oenb[101:1]) begin
+                            issue_req_instr <= la_data_in[101:70];
+                            issue_valid <= la_data_in[69];
+                            register_valid <= la_data_in[68];
+                            register_rs[1] <= la_data_in[67:36];
+                            register_rs[0] <= la_data_in[35:4];
+                            register_rs_valid <= la_data_in[3:2];
+                            result_ready <= la_data_in[1];
+
+
+                        end else begin
+                            la_data_out[39] <= issue_ready;
+                            la_data_out[38] <= issue_resp_accept;
+                            la_data_out[37] <= issue_resp_writeback;
+                            la_data_out[36:35] <= issue_resp_register_read;
+                            la_data_out[34] <= register_ready;
+                            la_data_out[33] <= result_valid;
+                            la_data_out[32:1] <= result_data;
+                        end
                     end
 
                     // eFPGA
                     default: begin
                         // inputs
-                        {issue_req_instr[31:18],issue_valid,issue_req_instr,register_valid,register_rs[1],register_rs[0],register_rs_valid,result_ready} <= UIO_BOT_UOUT_PAD[95:13];
                         issue_req_instr[17:0] <= UIO_TOP_UOUT_PAD[17:0];
 
+                        issue_req_instr[31:18] <= UIO_BOT_UOUT_PAD[95:82];
+                        issue_valid <= UIO_BOT_UOUT_PAD[81];
+                        register_valid <= UIO_BOT_UOUT_PAD[80];
+                        register_rs[1] <= UIO_BOT_UOUT_PAD[79:48];
+                        register_rs[0] <= UIO_BOT_UOUT_PAD[47:16];
+                        register_rs_valid <= UIO_BOT_UOUT_PAD[15:14];
+                        result_ready <= UIO_BOT_UOUT_PAD[13];
+
                         //outputs
-                        UIO_BOT_UIN_PAD[39:1] <= {
-                            issue_ready,
-                            issue_resp_accept,
-                            issue_resp_writeback,
-                            issue_resp_register_read,
-                            register_ready,
-                            result_valid,
-                            result_data
-                        };
+                        UIO_BOT_UIN_PAD[39] <= issue_ready;
+                        UIO_BOT_UIN_PAD[38] <= issue_resp_accept;
+                        UIO_BOT_UIN_PAD[37] <= issue_resp_writeback;
+                        UIO_BOT_UIN_PAD[36:35] <= issue_resp_register_read;
+                        UIO_BOT_UIN_PAD[34] <= register_ready;
+                        UIO_BOT_UIN_PAD[33] <= result_valid;
+                        UIO_BOT_UIN_PAD[32:1] <= result_data;
                     end
                 endcase
             end
