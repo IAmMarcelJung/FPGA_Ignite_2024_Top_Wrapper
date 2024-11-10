@@ -1,4 +1,3 @@
-
 module summer_school_top_wrapper #(
     parameter NUM_OF_TOTAL_FABRIC_IOS = 31,
     parameter NUM_OF_LOGIC_ANALYZER_BITS = 128,
@@ -26,11 +25,10 @@ module summer_school_top_wrapper #(
     output [NUM_OF_TOTAL_FABRIC_IOS-1:0] io_oeb,
 
     // Independent clock (on independent integer divider)
-    // NOTE: unused, we are using the wishbone clock
     input user_clock2
 );
 
-    // The number of IOs that can be used the FPGA user design
+    // The number of IOs that can be used by the FPGA user design
     localparam NUM_FABRIC_USER_IOS = 16;
     localparam [31:0] BASE_WB_ADDRESS = 32'h3000_0000;
     localparam [31:0] CONFIG_DATA_WB_ADDRESS = BASE_WB_ADDRESS;
@@ -106,7 +104,6 @@ module summer_school_top_wrapper #(
     reg [67:0] UIO_BOT_UIN_PAD;
 
 
-    // TODO: TRIPLE (!!!) check everything here!!!
     flexbex_soc_top flexbex_eFPGA (
         .A_config_C(),  // NOTE: Dirk said to leave this empty since its not needed
         .B_config_C(),  // NOTE: Dirk said to leave this empty since its not needed
@@ -382,8 +379,6 @@ module summer_school_top_wrapper #(
             wbs_ack_o <= (wbs_stb_i && !wbs_sta_o && (wbs_adr_i == CONFIG_DATA_WB_ADDRESS));
     end
 
-    // TODO: this needs to be checked thoroughly
-
     assign resetn = io_in[RESETN_IO];
     assign select_module = io_in[SELECT_MODULE_IO];
     assign sel = io_in[SEL_IO];
@@ -393,7 +388,6 @@ module summer_school_top_wrapper #(
     assign io_out[RECEIVE_LED_IO] = ReceiveLED;
     assign clk_sel = io_in[CLK_SEL_IO];
 
-    //TODO: double check, but should be fine
     assign io_oeb[RESETN_IO] = 1'b1;
     assign io_oeb[SELECT_MODULE_IO] = 1'b1;
     assign io_oeb[SEL_IO] = 1'b1;
