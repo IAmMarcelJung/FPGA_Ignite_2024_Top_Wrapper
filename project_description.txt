@@ -1,0 +1,7 @@
+This is a Multi Project Die (MPD) submission which contains designs created
+during the FPGA Ignite Summer School 2024 at Heidelberg University. The designs
+include a VGA driver with a Pixel Processing Unit (PPU) (FPGAIgnite-VGA), a
+random number generator (THE RING), an application-level posit capable RISC-V
+core (PERCIVAL) and a RISC-V eFPGA with custom instruction extensions (CXBex).
+All designs are connected to an eFPGA created using the FABulous Framework.
+
